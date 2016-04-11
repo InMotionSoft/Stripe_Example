@@ -13,7 +13,7 @@
 @import SVProgressHUD;
 
 
-@interface IMSCustomPaymentViewController () <IMSExpDatePickerDataSourceDelegate>
+@interface IMSCustomPaymentViewController () <IMSExpDatePickerDataSourceDelegate, UITextFieldDelegate>
 
 @property (weak, nonatomic) IBOutlet UITextField *cardNumberTextField;
 @property (weak, nonatomic) IBOutlet UITextField *expirationDateTextField;
@@ -29,8 +29,6 @@
 {
     [super viewDidLoad];
     [self setupExpDatePickerView];
-    
-    self.cardParams = [STPCardParams new];
 }
 
 
@@ -82,6 +80,16 @@
     cardParams.expYear = [[expComp lastObject] integerValue];
     cardParams.cvc = self.cvcNumberTextField.text;
     
+    if ([STPCardValidator validationStateForExpirationYear:[expComp lastObject] inMonth:[expComp firstObject]]) {
+        [SVProgressHUD showErrorWithStatus:@"EXP Date is invalid"];
+        return;
+    }
+    
+    if ([STPCardValidator validationStateForNumber:cardParams.number validatingCardBrand:YES]) {
+        [SVProgressHUD showErrorWithStatus:@"Card number is invalid"];
+        return;
+    }
+    
     if ([STPCardValidator validationStateForCard:cardParams] == STPCardValidationStateValid) {
         [SVProgressHUD show];
         [[STPAPIClient sharedClient] createTokenWithCard:cardParams
@@ -109,7 +117,60 @@
 
 
 #pragma mark -
+#pragma mark UITextFieldDelegate
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+{
+    if (textField == self.cardNumberTextField) {
+        return [self cardNumberTextFieldShouldChangeCharactersInRange:range replacementString:string];
+        
+    } else if (textField == self.cvcNumberTextField) {
+        return [self cvcNumberTextFieldShouldChangeCharactersInRange:range replacementString:string];
+    }
+    
+    return NO;
+}
+
+- (BOOL)textFieldShouldClear:(UITextField *)textField
+{
+    unichar lastCharacter = [textField.text characterAtIndex:textField.text.length - 1];
+    if (lastCharacter == ' ') {
+        textField.text = [textField.text substringToIndex:textField.text.length - 1];
+    }
+    return YES;
+}
+
+
+#pragma mark -
 #pragma mark Help Methods
+
+- (BOOL)cardNumberTextFieldShouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+{
+    NSString *resultString = [self.cardNumberTextField.text stringByReplacingCharactersInRange:range withString:string];
+    
+    STPCardBrand cardBrand = [STPCardValidator brandForNumber:resultString];
+    NSUInteger fragmentLength = [STPCardValidator fragmentLengthForCardBrand:cardBrand];
+    NSUInteger maxLength = [STPCardValidator lengthForCardBrand:cardBrand];
+    
+    NSString *clearedString = [resultString stringByReplacingOccurrencesOfString:@" " withString:@""];
+    if (!(clearedString.length % fragmentLength) && resultString.length && clearedString.length < maxLength) {
+        resultString = [resultString stringByAppendingString:@" "];
+    }
+    
+    if (clearedString.length <= maxLength) {
+        self.cardNumberTextField.text = resultString;
+    }
+    return NO;
+}
+
+- (BOOL)cvcNumberTextFieldShouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+{
+    NSString *resultString = [self.cvcNumberTextField.text stringByReplacingCharactersInRange:range withString:string];
+    STPCardBrand cardBrand = [STPCardValidator brandForNumber:resultString];
+    NSUInteger maxCVCLength = [STPCardValidator maxCVCLengthForCardBrand:cardBrand];
+    
+    return (resultString.length < maxCVCLength);
+}
 
 - (void)performPayProcessForToken:(NSString *)token
 {
