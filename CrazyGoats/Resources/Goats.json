@@ -1,0 +1,50 @@
+ [
+      {
+          "id" : 0,
+          "name" : "Agnes",
+          "photoName" : "agnes.jpg",
+          "price" : 70.00
+      },
+  
+      {
+          "id" : 1,
+          "name" : "Benny",
+          "photoName" : "benny.jpg",
+          "price" : 120.00
+      },
+  
+      {
+          "id" : 2,
+          "name" : "Blake",
+          "photoName" : "Blake.jpg",
+          "price" : 150.00
+      },
+  
+      {
+          "id" : 3,
+          "name" : "Chief",
+          "photoName" : "Chief.jpg",
+          "price" : 400.00
+      },
+  
+      {
+          "id" : 4,
+          "name" : "Henry",
+          "photoName" : "Henry.jpg",
+          "price" : 350.00
+      },
+  
+      {
+          "id" : 5,
+          "name" : "Jackie",
+          "photoName" : "Jackie.jpg",
+          "price" : 270.00
+      },
+  
+      {
+          "id" : 5,
+          "name" : "Jane",
+          "photoName" : "Jane.jpg",
+          "price" : 190.00
+      },
+  ]

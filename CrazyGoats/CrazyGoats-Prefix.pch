@@ -1,0 +1,14 @@
+//
+//  CrazyGoats-Prefix.pch
+//  CrazyGoats
+//
+//  Created by Max on 06.04.16.
+//  Copyright © 2016 InMotionSoft. All rights reserved.
+//
+
+#ifndef CrazyGoats_Prefix_pch
+#define CrazyGoats_Prefix_pch
+
+#import "IMSDefines.h"
+
+#endif /* CrazyGoats_Prefix_pch */
